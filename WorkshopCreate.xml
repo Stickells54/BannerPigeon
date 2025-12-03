@@ -1,0 +1,47 @@
+<Tasks>
+    <CreateItem/>
+    <UpdateItem>
+        <ModuleFolder Value="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon"/>
+        
+        <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Mount &amp; Blade II: Bannerlord. Send letters to settlement owners and kingdom leaders from anywhere without traveling across the map. Perfect for diplomacy, recruitment, and managing your relationships with lords efficiently.
+
+Features:
+• Contact settlement owners and kingdom leaders remotely via carrier pigeon
+• Realistic response delays (configurable 1-14 days, default 3 days)
+• Adjustable gold cost per pigeon (10-1000g, default 50g)
+• Available in both towns and castles (individually configurable)
+• Automatic conversation initiation when response arrives
+• Full MCM (Mod Configuration Menu) integration for easy customization
+• Save game compatible - uses proper save system serialization
+• No conflicts with vanilla game or other mods
+
+MCM Settings:
+• Pigeon Cost: Adjust gold required per message
+• Response Time: Set realistic delivery delays
+• Location Toggles: Enable/disable in towns or castles
+• Notification Options: Control response arrival alerts
+
+Perfect for players who want to streamline diplomacy, avoid endless map travel, and focus on strategy rather than chasing lords across Calradia.
+
+Compatible with Bannerlord v1.2.0+
+Requires: Mod Configuration Menu (MCM) v5.10.2 or higher"/>
+        
+        <Tags> 
+            <!-- Type Tag -->
+            <Tag Value="Utility" />
+            
+            <!-- Setting Tag -->
+            <Tag Value="Medieval" />
+            
+            <!-- Game Mode Tag -->
+            <Tag Value="Singleplayer" />
+            
+            <!-- Compatible Version - Update this to match your Bannerlord version -->
+            <Tag Value="v1.3.9" />
+        </Tags>
+        
+        <Image Value="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\Image.png"/>
+        
+        <Visibility Value="Public"/>
+    </UpdateItem>
+</Tasks>

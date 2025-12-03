@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<LangVersion>10.0</LangVersion>
+		<Platforms>x64</Platforms>
+		<Configurations>Debug;Release</Configurations>
+		<AssemblyName>BannerPigeon</AssemblyName>
+		<RootNamespace>BannerPigeon</RootNamespace>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<OutputPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\bin\Win64_Shipping_Client\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<Optimize>false</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<OutputPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\bin\Win64_Shipping_Client\</OutputPath>
+		<Optimize>true</Optimize>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Bannerlord.MCM" Version="5.10.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="TaleWorlds.Core">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Core.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="TaleWorlds.Library">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Library.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="TaleWorlds.Localization">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Localization.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="TaleWorlds.MountAndBlade">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="TaleWorlds.CampaignSystem">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="TaleWorlds.ObjectSystem">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.ObjectSystem.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="TaleWorlds.SaveSystem">
+			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.SaveSystem.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+
+	<!-- Copy DLL to Editor folder after build -->
+	<Target Name="CopyToEditorFolder" AfterTargets="Build">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\bin\Win64_Shipping_wEditor\" />
+		<Message Text="Copied $(TargetFileName) to Editor folder" Importance="high" />
+	</Target>
+
+</Project>
