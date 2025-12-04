@@ -35,5 +35,15 @@ namespace BannerPigeon.Settings
 			HintText = "Show notification when a pigeon response arrives.")]
 		[SettingPropertyGroup("UI", GroupOrder = 2)]
 		public bool ShowNotifications { get; set; } = true;
+
+		[SettingPropertyBool("Use Realistic Travel Time", Order = 5, RequireRestart = false,
+			HintText = "Calculate response time based on distance to the lord.")]
+		[SettingPropertyGroup("Pigeon Mail", GroupOrder = 0)]
+		public bool UseRealisticTravelTime { get; set; } = true;
+
+		[SettingPropertyInteger("Pigeon Speed (Map Units/Day)", 10, 200, Order = 6, RequireRestart = false,
+			HintText = "How fast pigeons fly. Higher is faster. Default is 50.")]
+		[SettingPropertyGroup("Pigeon Mail", GroupOrder = 0)]
+		public int PigeonSpeed { get; set; } = 50;
 	}
 }

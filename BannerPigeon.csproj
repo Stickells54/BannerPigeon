@@ -7,6 +7,8 @@
 		<Configurations>Debug;Release</Configurations>
 		<AssemblyName>BannerPigeon</AssemblyName>
 		<RootNamespace>BannerPigeon</RootNamespace>
+		<Version>1.2.0</Version>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -53,6 +55,7 @@
 			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.SaveSystem.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+		<Reference Include="Microsoft.CSharp" />
 	</ItemGroup>
 
 	<!-- Copy DLL to Editor folder after build -->

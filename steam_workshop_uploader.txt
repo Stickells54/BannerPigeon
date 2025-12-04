@@ -1,0 +1,7 @@
+Starting...
+LoadWithFullPath  subModulePath = G:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\BannerPigeon/SubModule.xml
+Status: k_EItemUpdateStatusPreparingConfig 0 / 0
+Status: k_EItemUpdateStatusPreparingConfig 0 / 0
+Status: k_EItemUpdateStatusInvalid 0 / 0
+Uploading item failed. File not found!
+Finished...

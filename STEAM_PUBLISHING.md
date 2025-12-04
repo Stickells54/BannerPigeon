@@ -35,7 +35,29 @@ Create a file called `WorkshopCreate.xml` anywhere on your computer with this co
         <ModuleFolder Value="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon"/>
         <!-- Path to your PUBLISHED module folder from Step 1 -->
         
-        <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Bannerlord. Send letters to lords from settlements for a small fee and receive responses after a few days. All costs and timing are configurable via MCM."/>
+        <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Mount &amp; Blade II: Bannerlord. Send letters to settlement owners and kingdom leaders from anywhere without traveling across the map. Perfect for diplomacy, recruitment, and managing your relationships with lords efficiently.
+
+Features:
+• Contact settlement owners and kingdom leaders remotely via carrier pigeon
+• Realistic Travel Time: Optional distance-based delays (pigeons fly across the map!)
+• Conversation Queue: Never miss a response - letters queue up if you are busy
+• Settlement Support: Contact lords whether they are in a party or resting in a town
+• Prisoner Checks: Smart validation prevents wasting pigeons on imprisoned lords
+• Economy System: Gold cost is paid to the local settlement owner (if applicable)
+• Full MCM (Mod Configuration Menu) integration for easy customization
+• Save game compatible - uses proper save system serialization
+
+MCM Settings:
+• Pigeon Cost: Adjust gold required per message
+• Response Time: Choose between fixed days or realistic distance-based travel
+• Pigeon Speed: Fine-tune how fast pigeons fly when using realistic travel time
+• Location Toggles: Enable/disable in towns or castles
+• Notification Options: Control response arrival alerts
+
+Perfect for players who want to streamline diplomacy, avoid endless map travel, and focus on strategy rather than chasing lords across Calradia.
+
+Compatible with Bannerlord v1.2.0+
+Requires: Mod Configuration Menu (MCM) v5.10.2 or higher"/>
         
         <Tags> 
             <!-- Type Tags -->
