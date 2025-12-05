@@ -27,3 +27,5 @@ obj/
 !*.md
 
 # Internal documentation
+CHANGELOG_INTERNAL.md
+STEAM_PUBLISHING.md
