@@ -1,7 +1,9 @@
 <Tasks>
-    <UpdateItem>
+    <GetItem>
         <ItemId Value="3617335871"/>
-        <ModuleFolder Value="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\"/>
+    </GetItem>
+    <UpdateItem>
+        <ModuleFolder Value="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon"/>
         
         <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Mount &amp; Blade II: Bannerlord. Send letters to settlement owners and kingdom leaders from anywhere without traveling across the map. Perfect for diplomacy, recruitment, and managing your relationships with lords efficiently.
 
@@ -40,9 +42,5 @@ Requires: Mod Configuration Menu (MCM) v5.10.2 or higher"/>
             <!-- Compatible Version - Update this to match your Bannerlord version -->
             <Tag Value="v1.3.9" />
         </Tags>
-        
-        <Image Value="C:\Temp\Image.png"/>
-
-        <Visibility Value="Public"/>
     </UpdateItem>
 </Tasks>
