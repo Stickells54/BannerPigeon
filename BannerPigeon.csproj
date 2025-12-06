@@ -7,18 +7,23 @@
 		<Configurations>Debug;Release</Configurations>
 		<AssemblyName>BannerPigeon</AssemblyName>
 		<RootNamespace>BannerPigeon</RootNamespace>
-		<Version>1.2.0</Version>
+		<Version>1.4.1</Version>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
+	<!-- Bannerlord installation path - can be overridden via environment variable -->
+	<PropertyGroup>
+		<BannerlordPath Condition="'$(BannerlordPath)' == ''">G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord</BannerlordPath>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<OutputPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\bin\Win64_Shipping_Client\</OutputPath>
+		<OutputPath>$(BannerlordPath)\Modules\BannerPigeon\bin\Win64_Shipping_Client\</OutputPath>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>
 		<Optimize>false</Optimize>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<OutputPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\bin\Win64_Shipping_Client\</OutputPath>
+		<OutputPath>$(BannerlordPath)\Modules\BannerPigeon\bin\Win64_Shipping_Client\</OutputPath>
 		<Optimize>true</Optimize>
 	</PropertyGroup>
 
@@ -28,39 +33,39 @@
 
 	<ItemGroup>
 		<Reference Include="TaleWorlds.Core">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Core.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.Core.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="TaleWorlds.Library">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Library.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.Library.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="TaleWorlds.Localization">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.Localization.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.Localization.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="TaleWorlds.MountAndBlade">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.MountAndBlade.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="TaleWorlds.CampaignSystem">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="TaleWorlds.ObjectSystem">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.ObjectSystem.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.ObjectSystem.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="TaleWorlds.SaveSystem">
-			<HintPath>G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\bin\Win64_Shipping_Client\TaleWorlds.SaveSystem.dll</HintPath>
+			<HintPath>$(BannerlordPath)\bin\Win64_Shipping_Client\TaleWorlds.SaveSystem.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 		<Reference Include="Microsoft.CSharp" />
 	</ItemGroup>
 
 	<!-- Copy DLL to Editor folder after build -->
-	<Target Name="CopyToEditorFolder" AfterTargets="Build">
-		<Copy SourceFiles="$(TargetPath)" DestinationFolder="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon\bin\Win64_Shipping_wEditor\" />
+	<Target Name="CopyToEditorFolder" AfterTargets="Build" Condition="Exists('$(BannerlordPath)')">
+		<Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BannerlordPath)\Modules\BannerPigeon\bin\Win64_Shipping_wEditor\" />
 		<Message Text="Copied $(TargetFileName) to Editor folder" Importance="high" />
 	</Target>
 

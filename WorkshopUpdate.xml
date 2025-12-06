@@ -5,10 +5,11 @@
     <UpdateItem>
         <ModuleFolder Value="G:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\BannerPigeon"/>
         
-        <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Mount &amp; Blade II: Bannerlord. Send letters to settlement owners and kingdom leaders from anywhere without traveling across the map. Perfect for diplomacy, recruitment, and managing your relationships with lords efficiently.
+        <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Mount &amp; Blade II: Bannerlord. Send letters to settlement owners, kingdom leaders, and your caravan leaders from anywhere without traveling across the map. Perfect for diplomacy, recruitment, and managing your relationships with lords efficiently.
 
 Features:
 • Contact settlement owners and kingdom leaders remotely via carrier pigeon
+• Contact your own caravan leaders remotely
 • Realistic Travel Time: Optional distance-based delays (pigeons fly across the map!)
 • Conversation Queue: Never miss a response - letters queue up if you are busy
 • Settlement Support: Contact lords whether they are in a party or resting in a town

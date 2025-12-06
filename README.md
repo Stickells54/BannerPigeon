@@ -23,6 +23,7 @@ A Mount & Blade II: Bannerlord mod that allows you to send carrier pigeons to lo
 3. Choose who to contact:
    - Settlement Owner
    - Kingdom Leader
+   - Caravan Leader (Your clan's caravans)
 4. Pay the pigeon cost
 5. Wait for the response (configurable days)
 6. When ready, you'll automatically enter conversation with the lord
@@ -57,6 +58,13 @@ Access settings via **ESC → Mod Options → BannerPigeon**:
 - Safe to add to existing saves
 
 ## Version History
+
+### v1.4.2 (2025-12-06)
+- **Crash Fix**: Added defensive coding to prevent crashes when entering towns/castles
+- **MCM Safety**: Null checks for MCM settings access - mod no longer crashes if MCM is missing
+- **Scene Transition Guard**: Prevents conversation starts during scene loading
+- **Daily Tick Protection**: Wrapped daily tick processing in try-catch
+- **Caravan Query Safety**: Added null checks when querying MobileParty collection
 
 ### v1.2.0 (2025-12-04)
 - **Realistic Travel Time**: Optional distance-based response delays

@@ -1,0 +1,48 @@
+Starting...
+LoadWithFullPath  subModulePath = G:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\BannerPigeon/SubModule.xml
+Status: k_EItemUpdateStatusPreparingConfig 0 / 0
+Status: k_EItemUpdateStatusPreparingConfig 0 / 0
+Status: k_EItemUpdateStatusPreparingContent 0 / 0
+Status: k_EItemUpdateStatusPreparingContent 0 / 0
+Status: k_EItemUpdateStatusPreparingContent 0 / 0
+Status: k_EItemUpdateStatusPreparingContent 0 / 0
+Status: k_EItemUpdateStatusPreparingContent 0 / 1148446
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 0
+Status: k_EItemUpdateStatusUploadingContent 0 / 25724
+Status: k_EItemUpdateStatusUploadingContent 0 / 25724
+Status: k_EItemUpdateStatusUploadingContent 0 / 25724
+Status: k_EItemUpdateStatusUploadingContent 0 / 25724
+Status: k_EItemUpdateStatusUploadingContent 769 / 25724
+Status: k_EItemUpdateStatusUploadingContent 769 / 25724
+Status: k_EItemUpdateStatusUploadingContent 769 / 25724
+Status: k_EItemUpdateStatusUploadingContent 25724 / 25724
+Status: k_EItemUpdateStatusUploadingContent 25724 / 25724
+Status: k_EItemUpdateStatusUploadingContent 25724 / 25724
+Status: k_EItemUpdateStatusUploadingContent 25724 / 25724
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusCommittingChanges 0 / 0
+Status: k_EItemUpdateStatusInvalid 0 / 0
+Uploading done!
+Finished...
