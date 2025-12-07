@@ -9,6 +9,8 @@
 		<RootNamespace>BannerPigeon</RootNamespace>
 		<Version>1.4.1</Version>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
 	</PropertyGroup>
 
 	<!-- Bannerlord installation path - can be overridden via environment variable -->

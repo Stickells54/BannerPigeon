@@ -2,7 +2,7 @@
 <Module>
 	<Name value="BannerPigeon"/>
 	<Id value="BannerPigeon"/>
-	<Version value="v1.4.2"/>
+	<Version value="v1.5.0"/>
 	<SingleplayerModule value="true"/>
 	<MultiplayerModule value="false"/>
 	<Official value="false"/>

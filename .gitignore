@@ -29,3 +29,15 @@ obj/
 # Internal documentation
 CHANGELOG_INTERNAL.md
 STEAM_PUBLISHING.md
+
+# Build logs
+last_build_log_full.txt
+last_build_log_x64_final.txt
+
+# Exploration
+fleet_api_discovery.txt
+explore_dlls.csx
+
+#DLL Exploration
+DLL_EXPLORATION.md
+DllExplorer/

@@ -59,6 +59,11 @@ Access settings via **ESC → Mod Options → BannerPigeon**:
 
 ## Version History
 
+### v1.5.0 (2025-12-07)
+- **Consolidated UI**: Simplified menu with 3 clean options (Send letter to lord, caravan, or port city)
+- **Searchable Lord List**: Contact any lord from a searchable popup list with clan names
+- **Fleet Recall via Letter**: Send a letter to a port city to recall your fleet remotely
+
 ### v1.4.2 (2025-12-06)
 - **Crash Fix**: Added defensive coding to prevent crashes when entering towns/castles
 - **MCM Safety**: Null checks for MCM settings access - mod no longer crashes if MCM is missing

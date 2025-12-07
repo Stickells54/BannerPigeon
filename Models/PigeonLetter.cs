@@ -11,6 +11,10 @@ namespace BannerPigeon.Models
 		public CampaignTime SentTime;
 		public CampaignTime ResponseTime;
 		public bool IsDelivered;
+		
+		// Fleet Recall properties
+		public bool IsFleetRecall;
+		public Settlement TargetSettlement;
 
 		public PigeonLetter()
 		{
@@ -23,6 +27,20 @@ namespace BannerPigeon.Models
 			SentTime = CampaignTime.Now;
 			ResponseTime = CampaignTime.Now + CampaignTime.Days(responseDays);
 			IsDelivered = false;
+			IsFleetRecall = false;
+			TargetSettlement = null;
+		}
+
+		// Constructor for Fleet Recall letters
+		public PigeonLetter(Settlement targetPort, Settlement origin, int deliveryDays)
+		{
+			TargetLord = null;
+			OriginSettlement = origin;
+			TargetSettlement = targetPort;
+			SentTime = CampaignTime.Now;
+			ResponseTime = CampaignTime.Now + CampaignTime.Days(deliveryDays);
+			IsDelivered = false;
+			IsFleetRecall = true;
 		}
 
 		public bool IsReadyForResponse()

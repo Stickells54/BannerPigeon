@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Actions;
 using TaleWorlds.CampaignSystem.Conversation;
@@ -47,7 +48,6 @@ namespace BannerPigeon
 
 		public override void SyncData(IDataStore dataStore)
 		{
-			// Save data
 			if (dataStore.IsSaving)
 			{
 				_savedTargetLords = new List<Hero>();
@@ -73,7 +73,6 @@ namespace BannerPigeon
 			dataStore.SyncData("_pigeonIsDelivered", ref _savedIsDelivered);
 			dataStore.SyncData("_pigeonCurrentRecipient", ref _currentLetterRecipient);
 
-			// Load data
 			if (dataStore.IsLoading)
 			{
 				_activeLetters = new List<PigeonLetter>();
@@ -115,26 +114,26 @@ namespace BannerPigeon
 				args => GameMenu.SwitchToMenu("pigeon_select_recipient"),
 				false, 5);
 
-			// Recipient selection menu
-			starter.AddGameMenu("pigeon_select_recipient", "Select a lord to contact via carrier pigeon:",
+			// Consolidated recipient selection menu - 3 clean options
+			starter.AddGameMenu("pigeon_select_recipient", "Select who to send a carrier pigeon to:",
 				null);
 
-			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_contact_settlement_owner", 
-				"Contact the settlement owner",
-				CanContactSettlementOwner,
-				OnContactSettlementOwner,
+			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_send_to_lord",
+				"Send letter to a lord",
+				CanContactAnyLord,
+				OnContactAnyLord,
 				false, 0);
 
-			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_contact_kingdom_leader",
-				"Contact the kingdom leader",
-				CanContactKingdomLeader,
-				OnContactKingdomLeader,
-				false, 1);
-
-			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_contact_caravan",
-				"Contact a caravan leader",
+			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_send_to_caravan",
+				"Send letter to a caravan",
 				CanContactCaravan,
 				OnContactCaravan,
+				false, 1);
+
+			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_send_to_port",
+				"Send letter to a port city (Fleet Recall)",
+				CanSendToPort,
+				OnSendToPort,
 				false, 2);
 
 			starter.AddGameMenuOption("pigeon_select_recipient", "pigeon_back",
@@ -188,76 +187,6 @@ namespace BannerPigeon
 			}
 		}
 
-		private bool CanContactSettlementOwner(MenuCallbackArgs args)
-		{
-			try
-			{
-				var owner = Settlement.CurrentSettlement?.OwnerClan?.Leader;
-				if (owner == null || owner == Hero.MainHero)
-				{
-					args.IsEnabled = false;
-					args.Tooltip = new TextObject("This settlement has no owner or you own it.");
-					return false;
-				}
-
-				if (owner.IsPrisoner)
-				{
-					args.IsEnabled = false;
-					args.Tooltip = new TextObject("The settlement owner is currently a prisoner.");
-					return false;
-				}
-
-				args.optionLeaveType = GameMenuOption.LeaveType.Submenu;
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		private bool CanContactKingdomLeader(MenuCallbackArgs args)
-		{
-			try
-			{
-				var kingdom = Settlement.CurrentSettlement?.OwnerClan?.Kingdom;
-				var leader = kingdom?.Leader;
-				
-				if (leader == null || leader == Hero.MainHero)
-				{
-					args.IsEnabled = false;
-					args.Tooltip = new TextObject("This settlement's kingdom has no leader or you are the leader.");
-					return false;
-				}
-
-				if (leader.IsPrisoner)
-				{
-					args.IsEnabled = false;
-					args.Tooltip = new TextObject("The kingdom leader is currently a prisoner.");
-					return false;
-				}
-
-				args.optionLeaveType = GameMenuOption.LeaveType.Submenu;
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-
-		private void OnContactSettlementOwner(MenuCallbackArgs args)
-		{
-			_currentLetterRecipient = Settlement.CurrentSettlement?.OwnerClan?.Leader;
-			GameMenu.SwitchToMenu("pigeon_confirm");
-		}
-
-		private void OnContactKingdomLeader(MenuCallbackArgs args)
-		{
-			_currentLetterRecipient = Settlement.CurrentSettlement?.OwnerClan?.Kingdom?.Leader;
-			GameMenu.SwitchToMenu("pigeon_confirm");
-		}
-
 		private bool CanContactCaravan(MenuCallbackArgs args)
 		{
 			try
@@ -283,19 +212,19 @@ namespace BannerPigeon
 		{
 			var caravans = MobileParty.All.Where(p => p.IsCaravan && p.Owner == Hero.MainHero && p.LeaderHero != null).ToList();
 			
-		var inquiryElements = new List<InquiryElement>();
-		foreach (var caravan in caravans)
-		{
-			// ImageIdentifier not available in this Bannerlord version, using null for now
-			inquiryElements.Add(new InquiryElement(caravan.LeaderHero, caravan.Name.ToString(), null));
-		}			// Fixed MultiSelectionInquiryData signature (added minSelectable)
+			var inquiryElements = new List<InquiryElement>();
+			foreach (var caravan in caravans)
+			{
+				inquiryElements.Add(new InquiryElement(caravan.LeaderHero, caravan.Name.ToString(), null));
+			}
+
 			MBInformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData(
-				"Select Caravan Leader",
-				"Choose which caravan leader you want to send a pigeon to:",
+				"Select Caravan",
+				"Choose which caravan you want to send a pigeon to:",
 				inquiryElements,
 				true,
-				1, // minSelectable
-				1, // maxSelectable
+				1,
+				1,
 				"Select",
 				"Cancel",
 				(selectedElements) => 
@@ -311,76 +240,279 @@ namespace BannerPigeon
 					}
 				},
 				(exited) => { },
-				""
+				"",
+				true
 			));
 		}
 
-	private void OnPigeonConfirmInit(MenuCallbackArgs args)
-	{
-		if (_currentLetterRecipient != null)
+		private bool CanContactAnyLord(MenuCallbackArgs args)
 		{
-			int cost = PigeonSettings.Instance.PigeonCost;
-			int days = CalculateResponseDays(_currentLetterRecipient);
-			
-			TextObject text = new TextObject(
-				"Send a carrier pigeon to {LORD_NAME} for {COST}{GOLD_ICON}? " +
-				"You should receive a response in approximately {DAYS} days.");
-			
-			text.SetTextVariable("LORD_NAME", _currentLetterRecipient.Name);
-			text.SetTextVariable("COST", cost);
-			text.SetTextVariable("GOLD_ICON", "{=!}<img src=\"General\\Icons\\Coin@2x\" extend=\"8\">");
-			text.SetTextVariable("DAYS", days);
-			
-			MBTextManager.SetTextVariable("PIGEON_CONFIRMATION_TEXT", text);
+			try
+			{
+				args.optionLeaveType = GameMenuOption.LeaveType.Submenu;
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
 		}
-	}
 
-	private int CalculateResponseDays(Hero recipient)
-	{
-		int days = PigeonSettings.Instance.ResponseDays;
-
-		if (PigeonSettings.Instance.UseRealisticTravelTime && Settlement.CurrentSettlement != null)
+		private void OnContactAnyLord(MenuCallbackArgs args)
 		{
-			IMapPoint targetPoint = null;
-			if (recipient.PartyBelongedTo != null)
+			var lords = Hero.AllAliveHeroes
+				.Where(h => h != null && h != Hero.MainHero && !h.IsPrisoner && h.IsLord && h.IsAlive)
+				.OrderBy(h => h.Name.ToString())
+				.ToList();
+
+			var inquiryElements = new List<InquiryElement>();
+			foreach (var lord in lords)
 			{
-				targetPoint = recipient.PartyBelongedTo;
-			}
-			else if (recipient.CurrentSettlement != null)
-			{
-				targetPoint = recipient.CurrentSettlement;
+				string clanInfo = lord.Clan != null ? $" ({lord.Clan.Name})" : "";
+				inquiryElements.Add(new InquiryElement(lord, lord.Name.ToString() + clanInfo, null));
 			}
 
-			if (targetPoint != null)
+			MBInformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData(
+				"Select Lord",
+				"Choose which lord you want to send a pigeon to:",
+				inquiryElements,
+				true,
+				1,
+				1,
+				"Select",
+				"Cancel",
+				(selectedElements) =>
+				{
+					if (selectedElements.Any())
+					{
+						var selectedHero = selectedElements.First().Identifier as Hero;
+						if (selectedHero != null)
+						{
+							_currentLetterRecipient = selectedHero;
+							GameMenu.SwitchToMenu("pigeon_confirm");
+						}
+					}
+				},
+				(exited) => { },
+				"",
+				true
+			));
+		}
+
+		private bool CanSendToPort(MenuCallbackArgs args)
+		{
+			try
+			{
+				args.optionLeaveType = GameMenuOption.LeaveType.Submenu;
+				var ports = GetPortCities();
+				if (ports == null || !ports.Any())
+				{
+					args.IsEnabled = false;
+					args.Tooltip = new TextObject("No port cities found.");
+					return false;
+				}
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		private void OnSendToPort(MenuCallbackArgs args)
+		{
+			var ports = GetPortCities();
+			
+			var inquiryElements = new List<InquiryElement>();
+			foreach (var port in ports)
+			{
+				string ownerInfo = port.OwnerClan != null ? $" ({port.OwnerClan.Name})" : "";
+				inquiryElements.Add(new InquiryElement(port, port.Name.ToString() + ownerInfo, null));
+			}
+
+			MBInformationManager.ShowMultiSelectionInquiry(new MultiSelectionInquiryData(
+				"Select Port City",
+				"Choose which port to recall your fleet to:",
+				inquiryElements,
+				true,
+				1,
+				1,
+				"Send",
+				"Cancel",
+				(selectedElements) =>
+				{
+					if (selectedElements.Any())
+					{
+						var selectedPort = selectedElements.First().Identifier as Settlement;
+						if (selectedPort != null)
+						{
+							SendFleetRecallLetter(selectedPort);
+						}
+					}
+				},
+				(exited) => { },
+				"",
+				true
+			));
+		}
+
+		private List<Settlement> GetPortCities()
+		{
+			var ports = new List<Settlement>();
+			foreach (var settlement in Settlement.All)
+			{
+				if (settlement != null && settlement.IsTown && IsPortCity(settlement))
+				{
+					ports.Add(settlement);
+				}
+			}
+			return ports.OrderBy(s => s.Name.ToString()).ToList();
+		}
+
+		private bool IsPortCity(Settlement settlement)
+		{
+			try
+			{
+				var type = settlement.GetType();
+				
+				var portProp = type.GetProperty("Port", BindingFlags.Public | BindingFlags.Instance);
+				if (portProp != null)
+				{
+					var portValue = portProp.GetValue(settlement);
+					if (portValue != null) return true;
+				}
+
+				var hasPortProp = type.GetProperty("HasPort", BindingFlags.Public | BindingFlags.Instance);
+				if (hasPortProp != null)
+				{
+					var hasPort = hasPortProp.GetValue(settlement);
+					if (hasPort is bool b && b) return true;
+				}
+
+				string name = settlement.Name?.ToString()?.ToLower() ?? "";
+				return name.Contains("port") || name.Contains("harbor") || name.Contains("harbour");
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		private int CalculateDeliveryDaysToSettlement(Settlement target)
+		{
+			int days = PigeonSettings.Instance.ResponseDays;
+
+			if (PigeonSettings.Instance.UseRealisticTravelTime && Settlement.CurrentSettlement != null)
 			{
 				float x1 = Settlement.CurrentSettlement.GatePosition.X;
 				float y1 = Settlement.CurrentSettlement.GatePosition.Y;
-				float x2 = 0, y2 = 0;
-
-				if (targetPoint is MobileParty mp)
-				{
-					// Use VisualPosition for 2D coordinates
-					x2 = mp.VisualPosition2DWithoutError.x;
-					y2 = mp.VisualPosition2DWithoutError.y;
-				}
-				else if (targetPoint is Settlement s)
-				{
-					x2 = s.GatePosition.X;
-					y2 = s.GatePosition.Y;
-				}
+				float x2 = target.GatePosition.X;
+				float y2 = target.GatePosition.Y;
 
 				float dx = x2 - x1;
 				float dy = y2 - y1;
-				float distance = (float)Math.Sqrt(dx*dx + dy*dy);
-				
+				float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+
 				float speed = (float)PigeonSettings.Instance.PigeonSpeed;
 				float travelDays = distance / speed;
 				days = 1 + (int)Math.Ceiling(travelDays);
 			}
+
+			return days;
 		}
 
-		return days;
-	}		private bool CanAffordPigeon(MenuCallbackArgs args)
+		private void SendFleetRecallLetter(Settlement targetPort)
+		{
+			int cost = PigeonSettings.Instance.PigeonCost;
+			int days = CalculateDeliveryDaysToSettlement(targetPort);
+
+			var settlementOwner = Settlement.CurrentSettlement?.OwnerClan?.Leader;
+			if (settlementOwner != null && settlementOwner != Hero.MainHero)
+			{
+				GiveGoldAction.ApplyBetweenCharacters(Hero.MainHero, settlementOwner, cost, false);
+			}
+			else
+			{
+				GiveGoldAction.ApplyBetweenCharacters(Hero.MainHero, null, cost, false);
+			}
+
+			var letter = new PigeonLetter(targetPort, Settlement.CurrentSettlement, days);
+			_activeLetters.Add(letter);
+
+			InformationManager.DisplayMessage(new InformationMessage(
+				$"Fleet recall letter sent to {targetPort.Name}. Your fleet will be called in {days} days.",
+				Colors.Green));
+
+			GameMenu.SwitchToMenu(Settlement.CurrentSettlement.IsTown ? "town" : "castle");
+		}
+
+		private void OnPigeonConfirmInit(MenuCallbackArgs args)
+		{
+			if (_currentLetterRecipient != null)
+			{
+				int cost = PigeonSettings.Instance.PigeonCost;
+				int days = CalculateResponseDays(_currentLetterRecipient);
+				
+				TextObject text = new TextObject(
+					"Send a carrier pigeon to {LORD_NAME} for {COST}{GOLD_ICON}? " +
+					"You should receive a response in approximately {DAYS} days.");
+				
+				text.SetTextVariable("LORD_NAME", _currentLetterRecipient.Name);
+				text.SetTextVariable("COST", cost);
+				text.SetTextVariable("GOLD_ICON", "{=!}<img src=\"General\\Icons\\Coin@2x\" extend=\"8\">");
+				text.SetTextVariable("DAYS", days);
+				
+				MBTextManager.SetTextVariable("PIGEON_CONFIRMATION_TEXT", text);
+			}
+		}
+
+		private int CalculateResponseDays(Hero recipient)
+		{
+			int days = PigeonSettings.Instance.ResponseDays;
+
+			if (PigeonSettings.Instance.UseRealisticTravelTime && Settlement.CurrentSettlement != null)
+			{
+				IMapPoint targetPoint = null;
+				if (recipient.PartyBelongedTo != null)
+				{
+					targetPoint = recipient.PartyBelongedTo;
+				}
+				else if (recipient.CurrentSettlement != null)
+				{
+					targetPoint = recipient.CurrentSettlement;
+				}
+
+				if (targetPoint != null)
+				{
+					float x1 = Settlement.CurrentSettlement.GatePosition.X;
+					float y1 = Settlement.CurrentSettlement.GatePosition.Y;
+					float x2 = 0, y2 = 0;
+
+					if (targetPoint is MobileParty mp)
+					{
+						x2 = mp.VisualPosition2DWithoutError.x;
+						y2 = mp.VisualPosition2DWithoutError.y;
+					}
+					else if (targetPoint is Settlement s)
+					{
+						x2 = s.GatePosition.X;
+						y2 = s.GatePosition.Y;
+					}
+
+					float dx = x2 - x1;
+					float dy = y2 - y1;
+					float distance = (float)Math.Sqrt(dx*dx + dy*dy);
+					
+					float speed = (float)PigeonSettings.Instance.PigeonSpeed;
+					float travelDays = distance / speed;
+					days = 1 + (int)Math.Ceiling(travelDays);
+				}
+			}
+
+			return days;
+		}
+
+		private bool CanAffordPigeon(MenuCallbackArgs args)
 		{
 			int cost = PigeonSettings.Instance.PigeonCost;
 			
@@ -400,7 +532,6 @@ namespace BannerPigeon
 			int cost = PigeonSettings.Instance.PigeonCost;
 			int days = CalculateResponseDays(_currentLetterRecipient);
 
-			// Deduct gold - give to settlement owner if possible
 			var settlementOwner = Settlement.CurrentSettlement?.OwnerClan?.Leader;
 			if (settlementOwner != null && settlementOwner != Hero.MainHero)
 			{
@@ -411,7 +542,6 @@ namespace BannerPigeon
 				GiveGoldAction.ApplyBetweenCharacters(Hero.MainHero, null, cost, false);
 			}
 
-			// Create and store the letter
 			var letter = new PigeonLetter(_currentLetterRecipient, Settlement.CurrentSettlement, days);
 			_activeLetters.Add(letter);
 
@@ -427,18 +557,23 @@ namespace BannerPigeon
 		{
 			try
 			{
-				// Check for letters ready for response
 				var readyLetters = _activeLetters.Where(l => l.IsReadyForResponse() && !_conversationQueue.Contains(l)).ToList();
 
 				foreach (var letter in readyLetters)
 				{
+					if (letter.IsFleetRecall)
+					{
+						ProcessFleetRecallLetter(letter);
+						letter.IsDelivered = true;
+						continue;
+					}
+
 					if (letter.TargetLord != null && letter.TargetLord.IsAlive && !letter.TargetLord.IsPrisoner)
 					{
 						_conversationQueue.Enqueue(letter);
 					}
 					else
 					{
-						// Lord is dead or prisoner, mark delivered but don't start conversation
 						letter.IsDelivered = true;
 						InformationManager.DisplayMessage(new InformationMessage(
 							$"A carrier pigeon returned from {(letter.TargetLord?.Name?.ToString() ?? "unknown")} but they could not be reached.",
@@ -447,13 +582,145 @@ namespace BannerPigeon
 				}
 
 				ProcessConversationQueue();
-
-				// Clean up delivered letters
 				_activeLetters.RemoveAll(l => l.IsDelivered);
 			}
 			catch
 			{
-				// Silently handle errors to prevent crash during daily tick
+			}
+		}
+
+		private void ProcessFleetRecallLetter(PigeonLetter letter)
+		{
+			if (letter.TargetSettlement == null)
+			{
+				InformationManager.DisplayMessage(new InformationMessage(
+					"Fleet recall failed: No target port specified.",
+					Colors.Red));
+				return;
+			}
+
+			bool success = TryCallFleetToPort(letter.TargetSettlement);
+			
+			if (success)
+			{
+				InformationManager.DisplayMessage(new InformationMessage(
+					$"Your fleet has been called to {letter.TargetSettlement.Name}!",
+					Colors.Green));
+			}
+			else
+			{
+				InformationManager.DisplayMessage(new InformationMessage(
+					$"Fleet recall to {letter.TargetSettlement.Name} could not be completed. (API not found or no fleet available)",
+					Colors.Yellow));
+			}
+		}
+
+		private bool TryCallFleetToPort(Settlement targetPort)
+		{
+			try
+			{
+				var mainParty = MobileParty.MainParty;
+				if (mainParty == null)
+				{
+					InformationManager.DisplayMessage(new InformationMessage("[Debug] MainParty is null", Colors.Red));
+					return false;
+				}
+
+				// Strategy 1: Try Anchor property on MobileParty
+				var partyType = mainParty.GetType();
+				var anchorProp = partyType.GetProperty("Anchor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+				if (anchorProp != null)
+				{
+					InformationManager.DisplayMessage(new InformationMessage($"[Debug] Found Anchor property on MobileParty", Colors.Cyan));
+					var anchor = anchorProp.GetValue(mainParty);
+					if (anchor != null)
+					{
+						InformationManager.DisplayMessage(new InformationMessage($"[Debug] Anchor object type: {anchor.GetType().FullName}", Colors.Cyan));
+						
+						var anchorType = anchor.GetType();
+						var callFleetMethod = anchorType.GetMethod("CallFleet", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+						
+						if (callFleetMethod != null)
+						{
+							InformationManager.DisplayMessage(new InformationMessage($"[Debug] Found CallFleet method!", Colors.Green));
+							callFleetMethod.Invoke(anchor, new object[] { targetPort });
+							return true;
+						}
+						else
+						{
+							var methods = anchorType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+							var methodNames = string.Join(", ", methods.Take(10).Select(m => m.Name));
+							InformationManager.DisplayMessage(new InformationMessage($"[Debug] Anchor methods: {methodNames}", Colors.Yellow));
+						}
+					}
+					else
+					{
+						InformationManager.DisplayMessage(new InformationMessage("[Debug] Anchor property is null", Colors.Yellow));
+					}
+				}
+				else
+				{
+					var props = partyType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+					var relatedProps = props.Where(p => 
+						p.Name.Contains("Anchor") || p.Name.Contains("Fleet") || 
+						p.Name.Contains("Naval") || p.Name.Contains("Ship"))
+						.Select(p => p.Name);
+					var propList = string.Join(", ", relatedProps);
+					InformationManager.DisplayMessage(new InformationMessage($"[Debug] No Anchor on MobileParty. Related props: {propList}", Colors.Yellow));
+				}
+
+				// Strategy 2: Try Campaign.Current
+				var campaign = Campaign.Current;
+				if (campaign != null)
+				{
+					var campaignType = campaign.GetType();
+					var campaignAnchorProp = campaignType.GetProperty("Anchor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+					if (campaignAnchorProp != null)
+					{
+						InformationManager.DisplayMessage(new InformationMessage("[Debug] Found Anchor on Campaign", Colors.Cyan));
+						var anchor = campaignAnchorProp.GetValue(campaign);
+						if (anchor != null)
+						{
+							var callFleetMethod = anchor.GetType().GetMethod("CallFleet", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+							if (callFleetMethod != null)
+							{
+								callFleetMethod.Invoke(anchor, new object[] { targetPort });
+								return true;
+							}
+						}
+					}
+				}
+
+				// Strategy 3: Try Clan
+				var clan = Hero.MainHero?.Clan;
+				if (clan != null)
+				{
+					var clanType = clan.GetType();
+					var clanAnchorProp = clanType.GetProperty("Anchor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+					if (clanAnchorProp != null)
+					{
+						InformationManager.DisplayMessage(new InformationMessage("[Debug] Found Anchor on Clan", Colors.Cyan));
+						var anchor = clanAnchorProp.GetValue(clan);
+						if (anchor != null)
+						{
+							var callFleetMethod = anchor.GetType().GetMethod("CallFleet", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+							if (callFleetMethod != null)
+							{
+								callFleetMethod.Invoke(anchor, new object[] { targetPort });
+								return true;
+							}
+						}
+					}
+				}
+
+				InformationManager.DisplayMessage(new InformationMessage("[Debug] Could not find fleet recall API", Colors.Red));
+				return false;
+			}
+			catch (Exception ex)
+			{
+				InformationManager.DisplayMessage(new InformationMessage($"[Debug] Exception: {ex.Message}", Colors.Red));
+				return false;
 			}
 		}
 
@@ -464,7 +731,6 @@ namespace BannerPigeon
 				if (_conversationQueue.Count == 0)
 					return;
 
-				// Don't start conversation during scene transitions or if already in conversation
 				if (Campaign.Current?.ConversationManager == null || 
 				    Campaign.Current.ConversationManager.IsConversationInProgress ||
 				    CampaignMission.Current != null ||
@@ -488,7 +754,6 @@ namespace BannerPigeon
 			}
 			catch
 			{
-				// Silently handle errors to prevent crash
 			}
 		}
 
@@ -502,15 +767,12 @@ namespace BannerPigeon
 					_conversationQueue.Dequeue();
 				}
 				_currentProcessingLetter = null;
-				
-				// Process next in queue
 				ProcessConversationQueue();
 			}
 		}
 
 		private void StartConversationWithLord(Hero lord)
 		{
-			// This triggers the standard lord conversation dialog
 			if (CampaignMission.Current == null)
 			{
 				PartyBase targetParty = null;
@@ -525,13 +787,11 @@ namespace BannerPigeon
 
 				if (targetParty != null)
 				{
-					// For caravans, don't set context to avoid triggering caravan encounter behaviors
 					if (lord.PartyBelongedTo == null || !lord.PartyBelongedTo.IsCaravan)
 					{
 						Campaign.Current.CurrentConversationContext = ConversationContext.Default;
 					}
 					
-					// If player is on campaign map, start a conversation encounter
 					CampaignMapConversation.OpenConversation(
 						new ConversationCharacterData(CharacterObject.PlayerCharacter, Hero.MainHero.PartyBelongedTo?.Party),
 						new ConversationCharacterData(lord.CharacterObject, targetParty));
