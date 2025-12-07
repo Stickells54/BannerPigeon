@@ -622,7 +622,7 @@ namespace BannerPigeon
 				var mainParty = MobileParty.MainParty;
 				if (mainParty == null)
 				{
-					InformationManager.DisplayMessage(new InformationMessage("[Debug] MainParty is null", Colors.Red));
+					// InformationManager.DisplayMessage(new InformationMessage("[Debug] MainParty is null", Colors.Red));
 					return false;
 				}
 
@@ -632,42 +632,42 @@ namespace BannerPigeon
 
 				if (anchorProp != null)
 				{
-					InformationManager.DisplayMessage(new InformationMessage($"[Debug] Found Anchor property on MobileParty", Colors.Cyan));
+					// InformationManager.DisplayMessage(new InformationMessage($"[Debug] Found Anchor property on MobileParty", Colors.Cyan));
 					var anchor = anchorProp.GetValue(mainParty);
 					if (anchor != null)
 					{
-						InformationManager.DisplayMessage(new InformationMessage($"[Debug] Anchor object type: {anchor.GetType().FullName}", Colors.Cyan));
+						// InformationManager.DisplayMessage(new InformationMessage($"[Debug] Anchor object type: {anchor.GetType().FullName}", Colors.Cyan));
 						
 						var anchorType = anchor.GetType();
 						var callFleetMethod = anchorType.GetMethod("CallFleet", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 						
 						if (callFleetMethod != null)
 						{
-							InformationManager.DisplayMessage(new InformationMessage($"[Debug] Found CallFleet method!", Colors.Green));
+							// InformationManager.DisplayMessage(new InformationMessage($"[Debug] Found CallFleet method!", Colors.Green));
 							callFleetMethod.Invoke(anchor, new object[] { targetPort });
 							return true;
 						}
 						else
 						{
-							var methods = anchorType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-							var methodNames = string.Join(", ", methods.Take(10).Select(m => m.Name));
-							InformationManager.DisplayMessage(new InformationMessage($"[Debug] Anchor methods: {methodNames}", Colors.Yellow));
+							// var methods = anchorType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+							// var methodNames = string.Join(", ", methods.Take(10).Select(m => m.Name));
+							// InformationManager.DisplayMessage(new InformationMessage($"[Debug] Anchor methods: {methodNames}", Colors.Yellow));
 						}
 					}
 					else
 					{
-						InformationManager.DisplayMessage(new InformationMessage("[Debug] Anchor property is null", Colors.Yellow));
+						// InformationManager.DisplayMessage(new InformationMessage("[Debug] Anchor property is null", Colors.Yellow));
 					}
 				}
 				else
 				{
-					var props = partyType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-					var relatedProps = props.Where(p => 
-						p.Name.Contains("Anchor") || p.Name.Contains("Fleet") || 
-						p.Name.Contains("Naval") || p.Name.Contains("Ship"))
-						.Select(p => p.Name);
-					var propList = string.Join(", ", relatedProps);
-					InformationManager.DisplayMessage(new InformationMessage($"[Debug] No Anchor on MobileParty. Related props: {propList}", Colors.Yellow));
+					// var props = partyType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+					// var relatedProps = props.Where(p => 
+					// 	p.Name.Contains("Anchor") || p.Name.Contains("Fleet") || 
+					// 	p.Name.Contains("Naval") || p.Name.Contains("Ship"))
+					// 	.Select(p => p.Name);
+					// var propList = string.Join(", ", relatedProps);
+					// InformationManager.DisplayMessage(new InformationMessage($"[Debug] No Anchor on MobileParty. Related props: {propList}", Colors.Yellow));
 				}
 
 				// Strategy 2: Try Campaign.Current
@@ -678,7 +678,7 @@ namespace BannerPigeon
 					var campaignAnchorProp = campaignType.GetProperty("Anchor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 					if (campaignAnchorProp != null)
 					{
-						InformationManager.DisplayMessage(new InformationMessage("[Debug] Found Anchor on Campaign", Colors.Cyan));
+						// InformationManager.DisplayMessage(new InformationMessage("[Debug] Found Anchor on Campaign", Colors.Cyan));
 						var anchor = campaignAnchorProp.GetValue(campaign);
 						if (anchor != null)
 						{
@@ -700,7 +700,7 @@ namespace BannerPigeon
 					var clanAnchorProp = clanType.GetProperty("Anchor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 					if (clanAnchorProp != null)
 					{
-						InformationManager.DisplayMessage(new InformationMessage("[Debug] Found Anchor on Clan", Colors.Cyan));
+						// InformationManager.DisplayMessage(new InformationMessage("[Debug] Found Anchor on Clan", Colors.Cyan));
 						var anchor = clanAnchorProp.GetValue(clan);
 						if (anchor != null)
 						{
@@ -714,12 +714,12 @@ namespace BannerPigeon
 					}
 				}
 
-				InformationManager.DisplayMessage(new InformationMessage("[Debug] Could not find fleet recall API", Colors.Red));
+				// InformationManager.DisplayMessage(new InformationMessage("[Debug] Could not find fleet recall API", Colors.Red));
 				return false;
 			}
 			catch (Exception ex)
 			{
-				InformationManager.DisplayMessage(new InformationMessage($"[Debug] Exception: {ex.Message}", Colors.Red));
+				InformationManager.DisplayMessage(new InformationMessage($"Error invoking fleet recall: {ex.Message}", Colors.Red));
 				return false;
 			}
 		}
