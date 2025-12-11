@@ -26,6 +26,9 @@ namespace BannerPigeon
 		private Queue<PigeonLetter> _conversationQueue;
 		private PigeonLetter _currentProcessingLetter;
 
+		// Pending caravan conversations - queued when caravan is at sea, triggered when accessible
+		private List<Hero> _pendingCaravanConversations;
+
 		// Save-friendly data structures
 		private List<Hero> _savedTargetLords;
 		private List<Settlement> _savedOriginSettlements;
@@ -37,12 +40,14 @@ namespace BannerPigeon
 		{
 			_activeLetters = new List<PigeonLetter>();
 			_conversationQueue = new Queue<PigeonLetter>();
+			_pendingCaravanConversations = new List<Hero>();
 		}
 
 		public override void RegisterEvents()
 		{
 			CampaignEvents.OnSessionLaunchedEvent.AddNonSerializedListener(this, OnSessionLaunched);
 			CampaignEvents.DailyTickEvent.AddNonSerializedListener(this, OnDailyTick);
+			CampaignEvents.HourlyTickEvent.AddNonSerializedListener(this, OnHourlyTick);
 			CampaignEvents.ConversationEnded.AddNonSerializedListener(this, OnConversationEnded);
 		}
 
@@ -72,9 +77,11 @@ namespace BannerPigeon
 			dataStore.SyncData("_pigeonResponseTimes", ref _savedResponseTimes);
 			dataStore.SyncData("_pigeonIsDelivered", ref _savedIsDelivered);
 			dataStore.SyncData("_pigeonCurrentRecipient", ref _currentLetterRecipient);
+			dataStore.SyncData("_pigeonPendingCaravanConvos", ref _pendingCaravanConversations);
 
 			if (dataStore.IsLoading)
 			{
+				_pendingCaravanConversations ??= new List<Hero>();
 				_activeLetters = new List<PigeonLetter>();
 				
 				if (_savedTargetLords != null && _savedTargetLords.Count > 0)
@@ -98,6 +105,49 @@ namespace BannerPigeon
 		private void OnSessionLaunched(CampaignGameStarter starter)
 		{
 			AddGameMenus(starter);
+		}
+
+		/// <summary>
+		/// Hourly check for pending caravan conversations - triggers when player leaves settlement
+		/// and caravan is accessible on the campaign map.
+		/// </summary>
+		private void OnHourlyTick()
+		{
+			try
+			{
+				// Only process when player is on the campaign map (not in settlement or mission)
+				if (Settlement.CurrentSettlement != null || CampaignMission.Current != null)
+					return;
+				
+				if (_pendingCaravanConversations == null || _pendingCaravanConversations.Count == 0)
+					return;
+				
+				// Check if any pending caravan conversations can now be triggered
+				var heroToProcess = _pendingCaravanConversations.FirstOrDefault(h => 
+					h != null && 
+					h.IsAlive && 
+					!h.IsPrisoner && 
+					h.PartyBelongedTo != null);
+				
+				if (heroToProcess != null)
+				{
+					_pendingCaravanConversations.Remove(heroToProcess);
+					
+					if (PigeonSettings.Instance?.ShowNotifications == true)
+					{
+						InformationManager.DisplayMessage(new InformationMessage(
+							$"Your caravan leader {heroToProcess.Name} is now available to speak with you!",
+							Colors.Cyan));
+					}
+					
+					// Start the conversation
+					StartConversationWithLord(heroToProcess);
+				}
+			}
+			catch
+			{
+				// Silently handle to prevent hourly tick crashes
+			}
 		}
 
 		private void AddGameMenus(CampaignGameStarter starter)
@@ -759,42 +809,151 @@ namespace BannerPigeon
 
 		private void OnConversationEnded(IEnumerable<CharacterObject> characters)
 		{
-			if (_currentProcessingLetter != null)
+			try
 			{
-				_currentProcessingLetter.IsDelivered = true;
-				if (_conversationQueue.Count > 0 && _conversationQueue.Peek() == _currentProcessingLetter)
+				if (_currentProcessingLetter != null)
 				{
-					_conversationQueue.Dequeue();
+					_currentProcessingLetter.IsDelivered = true;
+					if (_conversationQueue != null && _conversationQueue.Count > 0 && _conversationQueue.Peek() == _currentProcessingLetter)
+					{
+						_conversationQueue.Dequeue();
+					}
+					_currentProcessingLetter = null;
+					
+					// Delay queue processing to avoid issues when returning from sea convoy conversations
+					if (_conversationQueue != null && _conversationQueue.Count > 0)
+					{
+						// Use a delayed call to avoid NullReference when exiting conversations with parties at sea
+						Campaign.Current?.SetTimeSpeed(0);
+						ProcessConversationQueue();
+					}
 				}
-				_currentProcessingLetter = null;
-				ProcessConversationQueue();
 			}
+			catch (Exception ex)
+			{
+				// Silently handle conversation cleanup errors to prevent crashes
+				_currentProcessingLetter = null;
+				InformationManager.DisplayMessage(new InformationMessage(
+					$"[BannerPigeon] Conversation ended with an issue: {ex.Message}", 
+					Colors.Yellow));
+			}
+		}
+
+		/// <summary>
+		/// Shows acknowledgment that a letter reached a caravan and queues the conversation
+		/// for when the player leaves the settlement and can meet on the campaign map.
+		/// </summary>
+		private void QueueCaravanConversation(Hero lord)
+		{
+			string partyName = lord.PartyBelongedTo?.Name?.ToString() ?? "the convoy";
+			string title = $"Letter Delivered to {lord.Name}";
+			string message = $"Your letter has reached {lord.Name} with {partyName}.\n\n" +
+			                 $"They will meet with you to discuss matters once you leave the settlement.";
+			
+			InformationManager.ShowInquiry(new InquiryData(
+				title,
+				message,
+				true,
+				false,
+				"Understood",
+				null,
+				() => 
+				{
+					// Queue conversation for when player leaves settlement
+					if (!_pendingCaravanConversations.Contains(lord))
+					{
+						_pendingCaravanConversations.Add(lord);
+					}
+					
+					// Mark letter as delivered (response is queued, not immediate)
+					if (_currentProcessingLetter != null)
+					{
+						_currentProcessingLetter.IsDelivered = true;
+						if (_conversationQueue.Count > 0 && _conversationQueue.Peek() == _currentProcessingLetter)
+						{
+							_conversationQueue.Dequeue();
+						}
+						_currentProcessingLetter = null;
+					}
+					
+					// Process any remaining letters in queue
+					if (_conversationQueue.Count > 0)
+					{
+						ProcessConversationQueue();
+					}
+				},
+				null));
 		}
 
 		private void StartConversationWithLord(Hero lord)
 		{
-			if (CampaignMission.Current == null)
+			try
 			{
-				PartyBase targetParty = null;
-				if (lord.PartyBelongedTo != null)
+				if (CampaignMission.Current == null)
 				{
-					targetParty = lord.PartyBelongedTo.Party;
-				}
-				else if (lord.CurrentSettlement != null)
-				{
-					targetParty = lord.CurrentSettlement.Party;
-				}
-
-				if (targetParty != null)
-				{
-					if (lord.PartyBelongedTo == null || !lord.PartyBelongedTo.IsCaravan)
+					PartyBase targetParty = null;
+					if (lord.PartyBelongedTo != null)
 					{
-						Campaign.Current.CurrentConversationContext = ConversationContext.Default;
+						targetParty = lord.PartyBelongedTo.Party;
+						
+						// For caravans/convoys when player is in settlement: Queue conversation for later
+						// This avoids crashes from cross-terrain conversations (land/sea mismatch)
+						if (lord.PartyBelongedTo.IsCaravan && Settlement.CurrentSettlement != null)
+						{
+							QueueCaravanConversation(lord);
+							return;
+						}
 					}
-					
-					CampaignMapConversation.OpenConversation(
-						new ConversationCharacterData(CharacterObject.PlayerCharacter, Hero.MainHero.PartyBelongedTo?.Party),
-						new ConversationCharacterData(lord.CharacterObject, targetParty));
+					else if (lord.CurrentSettlement != null)
+					{
+						targetParty = lord.CurrentSettlement.Party;
+					}
+
+					if (targetParty != null)
+					{
+						// Get player's party safely
+						PartyBase playerParty = Hero.MainHero?.PartyBelongedTo?.Party;
+						
+						// If player has no party (shouldn't happen normally), use settlement party
+						if (playerParty == null && Settlement.CurrentSettlement != null)
+						{
+							playerParty = Settlement.CurrentSettlement.Party;
+						}
+						
+						// Final fallback - skip if we can't establish a valid player party
+						if (playerParty == null)
+						{
+							InformationManager.DisplayMessage(new InformationMessage(
+								$"Cannot start conversation - no valid player party context.", 
+								Colors.Yellow));
+							// Mark letter as delivered anyway to prevent infinite retries
+							if (_currentProcessingLetter != null)
+							{
+								_currentProcessingLetter.IsDelivered = true;
+							}
+							return;
+						}
+
+						if (lord.PartyBelongedTo == null || !lord.PartyBelongedTo.IsCaravan)
+						{
+							Campaign.Current.CurrentConversationContext = ConversationContext.Default;
+						}
+						
+						CampaignMapConversation.OpenConversation(
+							new ConversationCharacterData(CharacterObject.PlayerCharacter, playerParty),
+							new ConversationCharacterData(lord.CharacterObject, targetParty));
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				InformationManager.DisplayMessage(new InformationMessage(
+					$"[BannerPigeon] Failed to start conversation: {ex.Message}", 
+					Colors.Red));
+				// Mark letter as delivered to prevent infinite retry loops
+				if (_currentProcessingLetter != null)
+				{
+					_currentProcessingLetter.IsDelivered = true;
 				}
 			}
 		}

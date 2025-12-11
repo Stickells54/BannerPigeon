@@ -5,6 +5,7 @@ bin/
 obj/
 *.dll
 *.pdb
+*.txt
 
 ## Visual Studio files
 .vs/

@@ -59,6 +59,11 @@ Access settings via **ESC → Mod Options → BannerPigeon**:
 
 ## Version History
 
+### v1.5.1 (2025-12-09)
+- **Bug Fix**: Fixed crash when sending letters to lords on sea convoys while player is on land
+- **Improved Error Handling**: Conversation system now handles edge cases gracefully
+- **Better Null-Safety**: Party context properly validated before starting conversations
+
 ### v1.5.0 (2025-12-07)
 - **Consolidated UI**: Simplified menu with 3 clean options (Send letter to lord, caravan, or port city)
 - **Searchable Lord List**: Contact any lord from a searchable popup list with clan names

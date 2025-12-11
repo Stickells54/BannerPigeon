@@ -7,7 +7,18 @@
         
         <ItemDescription Value="BannerPigeon adds a carrier pigeon mail system to Mount &amp; Blade II: Bannerlord. Send letters to any lord, your caravan leaders, or even port cities to recall your fleet! Perfect for diplomacy, recruitment, and managing your clan efficiently.
 
-New in v1.5.0:
+New in v1.5.2:
+• Bug Fix: Improved sea convoy letter handling - conversations now properly defer until player leaves settlement
+• Letter acknowledgment shows immediately when convoy receives your message
+• Full conversation triggers automatically once you exit the settlement
+• Pending conversations are saved and persist across game saves
+
+v1.5.1:
+• Bug Fix: Fixed crash when sending letters to lords on sea convoys while player is on land
+• Improved error handling in conversation system
+• Better null-safety for party context during conversations
+
+v1.5.0:
 • Searchable Lord List: Contact ANY lord in the world via a searchable lineup!
 • Fleet Recall: Send a letter to a port city to summon your fleet.
 • Consolidated UI: Simplified and cleaner menu options.
